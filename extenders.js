@@ -37,6 +37,18 @@ Array.prototype.find = Array.prototype.find || function(callback){
   }
   return result;
 };
+Array.prototype.findIndex = Array.prototype.findIndex || function(callback){
+  if(!callback) throw "The callback is required";
+  if(!callback.isFunction) throw "The callback is not a function";
+  var result;
+  for(var i = 0, len = this.length; i < len; i++){
+    if(callback(this[i], i)){
+      result = i;
+      break;
+    }
+  }
+  return result || -1;
+};
 Array.prototype.mergeAsProperties = Array.prototype.mergeAsProperties || function(){
   var newObj = {};
   var _objects = this.filter(function(elem){return typeof elem === "object"});
@@ -52,6 +64,19 @@ Array.prototype.last = Array.prototype.last || function(){
   var len = this.length;
   if(len) return this[len-1];
   else throw "This array is empty";
+};
+Array.prototype.contains = Array.prototype.contains || function (item) {
+  return this.indexOf(item) !== -1;
+};
+Array.prototype.remove = Array.prototype.remove || function(){
+  var that = this;
+  var objToRemove = Array.prototype.slice.call(arguments);
+  objToRemove.forEach(function(obj){
+    while(that.contains(obj)){
+      that.splice(that.indexOf(obj), 1);
+    }
+  });
+  return that;
 };
 
 Object.prototype.clone = Object.prototype.clone || function(){
@@ -106,9 +131,6 @@ Object.prototype.trimAll = function(deep){
   });
   return that;
 }
-
-
-
 
 String.format = String.format || function(){
   var args = Array.prototype.slice.call(arguments);

@@ -30,9 +30,18 @@ app.get("/todos", function(req,res){
 });
 
 app.get("/todos/:id", function(req,res){
-  var id = req.params.id;
+  var id = parseInt(req.params.id);
   var todo = todos.find(function(item){return item.id == id; });
   if(todo) res.json(todo);
+  else res.status(404).send();
+});
+app.delete("/todos/:id", function(req,res){
+  var id = parseInt(req.params.id);
+  var todo = todos.find(function(item){return item.id == id; });
+  if(todo) {
+    todos.remove(todo);
+    res.send("done");
+  }
   else res.status(404).send();
 });
 
@@ -42,6 +51,7 @@ app.post("/todos", function(req, res){
   todos.push(body.defaults({id: todoId++, completed: false}).trimAll());
   res.json({"newId": body.id});
 });
+
 
 
 
