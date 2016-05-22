@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var app = express();
+require("./extenders.js");
 var PORT = process.env.PORT || 3000;
 
 var todos = [/*{
@@ -36,12 +37,9 @@ app.get("/todos/:id", function(req,res){
 });
 
 app.post("/todos", function(req, res){
-  var body = req.body;
-
-  body.id = todoId++;
-  body.completed = false;
-  todos.push(body);
-
+  var body = req.body.pick("description");
+  if(!body.description.isString() || !body.description.trim()) return res.status(404).send();
+  todos.push(body.defaults({id: todoId++, completed: false}).trimAll());
   res.json({"newId": body.id});
 });
 
