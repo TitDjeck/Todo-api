@@ -29,30 +29,56 @@ app.get("/todos", function(req,res){
   res.json(todos);
 });
 
-app.get("/todos/:id", function(req,res){
-  var id = parseInt(req.params.id);
-  var todo = todos.find(function(item){return item.id == id; });
-  if(todo) res.json(todo);
-  else res.status(404).send();
-});
-app.delete("/todos/:id", function(req,res){
-  var id = parseInt(req.params.id);
-  var todo = todos.find(function(item){return item.id == id; });
-  if(todo) {
-    todos.remove(todo);
-    res.send("done");
-  }
-  else res.status(404).send();
-});
-
 app.post("/todos", function(req, res){
   var body = req.body.pick("description");
   if(!body.description.isString() || !body.description.trim()) return res.status(404).send();
   todos.push(body.defaults({id: todoId++, completed: false}).trimAll());
   res.json({"newId": body.id});
 });
-
-
+app.get("/todos/:id", function(req,res){
+  var id = parseInt(req.params.id);
+  var todo = todos.find(function(item){return item.id == id; });
+  if(todo) res.json(todo);
+  else res.status(404).send();
+});
+app.put("/todos/:id", function(req, res){
+  var id = parseInt(req.params.id);
+  var todo = todos.find(function(item){ return item.id === id});
+  if(!todo) return res.status("404").send();
+  var body = req.body.pick("description", "completed");
+  var validAttributes = {};
+  
+  if(body.hasOwnProperty("completed")){
+    if(body.completed.isBoolean()){
+      validAttributes.completed = body.completed;
+    } else {
+      return res.status(400).send();
+    }
+  }
+  
+  if(body.hasOwnProperty("description")){
+    if(body.description.isString() && body.description.length){
+      validAttributes.description = body.description.trim();
+    } else {
+      return res.status(400).send();
+    }
+  }
+  
+  todo.extend(true, validAttributes);
+  
+  res.json(todo.omit("id"));
+});
+app.delete("/todos/:id", function(req,res){
+  var id = parseInt(req.params.id);
+  var todo = todos.find(function(item){return item.id === id; });
+  if(todo) {
+    todos.remove(todo);
+    res.send("done");
+  }
+  else {
+    res.status(404).send();
+  }    
+});
 
 
 app.listen(PORT, function(){

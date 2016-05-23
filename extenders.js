@@ -1,6 +1,6 @@
 
 Object.prototype.isArray = Object.prototype.isArray || function(){ return Array.prototype.isPrototypeOf(this); };
-Object.prototype.isBoolean = Object.prototype.isBoolean || function(){ return Boolean.prototype.isPrototypeOf(this); };
+Object.prototype.isBoolean = Object.prototype.isBoolean || function(){ return Boolean.prototype.isPrototypeOf(this) || this.toString() === "true" || this.toString() === "false"; };
 Object.prototype.isNumber = Object.prototype.isNumber || function(){ return Number.prototype.isPrototypeOf(this); };
 Object.prototype.isString = Object.prototype.isString || function(){ return String.prototype.isPrototypeOf(this); };
 Object.prototype.isDate = Object.prototype.isDate || function(){ return Date.prototype.isPrototypeOf(this); };
@@ -121,6 +121,17 @@ Object.prototype.omit = Object.prototype.omit || function(){
   });
   return newObj;
 };
+
+Object.prototype.extend = Object.prototype.extend || function(self, extendWith){
+  var that = this;
+  var source = self ? that : that.clone();  
+  var extentions = Array.prototype.slice.call(arguments, 1).mergeAsProperties();  
+  var keys = Object.getOwnPropertyNames(extentions);
+  keys.forEach(function(key){
+    source[key] = extentions[key];
+  });  
+  return source;
+}
 
 Object.prototype.trimAll = function(deep){
   var that = this;
