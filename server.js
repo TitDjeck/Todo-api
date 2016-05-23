@@ -1,8 +1,11 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var app = express();
+var db = require("./db.js");
 require("./extenders.js");
 var PORT = process.env.PORT || 3000;
+
+debugger;
 
 var todos = [/*{
   id: 1,
@@ -46,9 +49,16 @@ app.get("/todos", function(req,res){
 
 app.post("/todos", function(req, res){
   var body = req.body.pick("description");
-  if(!body.description.isString() || !body.description.trim()) return res.status(404).send();
-  todos.push(body.defaults({id: todoId++, completed: false}).trimAll());
-  res.json({"newId": body.id});
+  db.todo.create({
+    description: body.description || ""
+  }).then(function(todo){
+    res.json(todo.toJSON());
+  }).catch(function(error){
+    res.status(400).json(error);
+  });
+  // if(!body.description.isString() || !body.description.trim()) return res.status(404).send();
+  // todos.push(body.defaults({id: todoId++, completed: false}).trimAll());
+  // res.json({"newId": body.id});
 });
 app.get("/todos/:id", function(req,res){
   var id = parseInt(req.params.id);
@@ -95,7 +105,8 @@ app.delete("/todos/:id", function(req,res){
   }    
 });
 
-
-app.listen(PORT, function(){
-  console.log(`Express listening on port ${PORT}`);
+db.sequelize.sync().then(function() {
+	app.listen(PORT, function() {
+		console.log('Express listening on port ' + PORT + '!');
+	});
 });

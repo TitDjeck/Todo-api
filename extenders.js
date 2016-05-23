@@ -1,10 +1,10 @@
 Object.prototype.isArray = Object.prototype.isArray || function(){ return Array.prototype.isPrototypeOf(this); };
-Object.prototype.isBoolean = Object.prototype.isBoolean || function(){ return Boolean.prototype.isPrototypeOf(this); };
 Object.prototype.isNumber = Object.prototype.isNumber || function(){ return Number.prototype.isPrototypeOf(this); };
 Object.prototype.isString = Object.prototype.isString || function(){ return String.prototype.isPrototypeOf(this); };
 Object.prototype.isDate = Object.prototype.isDate || function(){ return Date.prototype.isPrototypeOf(this); };
 Object.prototype.isFunction = Object.prototype.isFunction || function(){ return Function.prototype.isPrototypeOf(this) };
 Object.prototype.isObject = Object.prototype.isObject || function(){ return typeof this === "object"; };
+Object.prototype.isBoolean = Object.prototype.isBoolean || function(){ return Boolean.prototype.isPrototypeOf(this) || (this.isString() && (this === "true" || this === "false") || (this.isNumber() && (this === 0 || this === 1))); };
 
 Object.prototype.toBoolean = Object.prototype.toBoolean || function(){
   if(this.isBoolean()) return this;
@@ -16,10 +16,10 @@ Object.prototype.toBoolean = Object.prototype.toBoolean || function(){
     if(this === 1) return true;
     else if(this === 0) return false;
     else throw "the values must be 1 or 0.";    
-  } else throw "this value is not convertible to boolean value.";
+  } else throw `${JSON.stringify(this)} value is not convertible to boolean value.`;
 };
 Object.prototype.toNumber = Object.prototype.toNumber || function(){
-  if(isNaN(this)) throw "this value is not convertible to a number.";
+  if(isNaN(this)) throw `${JSON.stringify(this)} value is not convertible to a number.`;
   return Number(this);
 };
 
