@@ -27,12 +27,18 @@ app.get("/", function(req, res){
 
 app.get("/todos", function(req,res){
   var queryParams = req.query.pick("id", "description", "completed");
+  var q = req.query.q || "";
   if(queryParams.id) queryParams.id = queryParams.id.toNumber();
   if(queryParams.completed) queryParams.completed = queryParams.completed.toBoolean();
   var filteredTodos = todos;
   
   if(Object.getOwnPropertyNames(queryParams).length){
     filteredTodos = todos.filterByValues(queryParams);
+  }
+  if(q.isString() && q.length){
+    filteredTodos = filteredTodos.filter(function(todo, indx){
+      return todo.description.toLowerCase().indexOf(q.toLowerCase()) > -1;
+    });
   }
   
   res.json(filteredTodos);
