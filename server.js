@@ -26,7 +26,16 @@ app.get("/", function(req, res){
 });
 
 app.get("/todos", function(req,res){
-  res.json(todos);
+  var queryParams = req.query.pick("id", "description", "completed");
+  if(queryParams.id) queryParams.id = queryParams.id.toNumber();
+  if(queryParams.completed) queryParams.completed = queryParams.completed.toBoolean();
+  var filteredTodos = todos;
+  
+  if(Object.getOwnPropertyNames(queryParams).length){
+    filteredTodos = todos.filterByValues(queryParams);
+  }
+  
+  res.json(filteredTodos);
 });
 
 app.post("/todos", function(req, res){

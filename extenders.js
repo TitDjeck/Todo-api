@@ -1,10 +1,28 @@
-
 Object.prototype.isArray = Object.prototype.isArray || function(){ return Array.prototype.isPrototypeOf(this); };
-Object.prototype.isBoolean = Object.prototype.isBoolean || function(){ return Boolean.prototype.isPrototypeOf(this) || this.toString() === "true" || this.toString() === "false"; };
+Object.prototype.isBoolean = Object.prototype.isBoolean || function(){ return Boolean.prototype.isPrototypeOf(this); };
 Object.prototype.isNumber = Object.prototype.isNumber || function(){ return Number.prototype.isPrototypeOf(this); };
 Object.prototype.isString = Object.prototype.isString || function(){ return String.prototype.isPrototypeOf(this); };
 Object.prototype.isDate = Object.prototype.isDate || function(){ return Date.prototype.isPrototypeOf(this); };
 Object.prototype.isFunction = Object.prototype.isFunction || function(){ return Function.prototype.isPrototypeOf(this) };
+Object.prototype.isObject = Object.prototype.isObject || function(){ return typeof this === "object"; };
+
+Object.prototype.toBoolean = Object.prototype.toBoolean || function(){
+  if(this.isBoolean()) return this;
+  else if(this.isString()){
+    if(this.toLowerCase() === "true") return true;
+    else if(this.toLowerCase() === "false") return false;
+    else throw "the values must be \"true\" or \"false\".";
+  } else if(this.isNumber()){
+    if(this === 1) return true;
+    else if(this === 0) return false;
+    else throw "the values must be 1 or 0.";    
+  } else throw "this value is not convertible to boolean value.";
+};
+Object.prototype.toNumber = Object.prototype.toNumber || function(){
+  if(isNaN(this)) throw "this value is not convertible to a number.";
+  return Number(this);
+};
+
 
 Array.prototype.forEach = Array.prototype.forEach || function(callback){
   if(!callback) throw "The callback is required";
@@ -27,7 +45,7 @@ Array.prototype.filter = Array.prototype.filter || function(callback){
 };
 Array.prototype.find = Array.prototype.find || function(callback){
   if(!callback) throw "The callback is required";
-  if(!callback.isFunction) throw "The callback is not a function";
+  if(!callback.isFunction()) throw "The callback is not a function";
   var result;
   for(var i = 0, len = this.length; i < len; i++){
     if(callback(this[i], i)){
@@ -39,7 +57,7 @@ Array.prototype.find = Array.prototype.find || function(callback){
 };
 Array.prototype.findIndex = Array.prototype.findIndex || function(callback){
   if(!callback) throw "The callback is required";
-  if(!callback.isFunction) throw "The callback is not a function";
+  if(!callback.isFunction()) throw "The callback is not a function";
   var result;
   for(var i = 0, len = this.length; i < len; i++){
     if(callback(this[i], i)){
@@ -121,6 +139,15 @@ Object.prototype.omit = Object.prototype.omit || function(){
   });
   return newObj;
 };
+Object.prototype.hasValues = Object.prototype.hasValues || function(values){
+  var that = this;
+  var keys = Object.getOwnPropertyNames(values);
+  var result = true;
+  keys.forEach(function(key){
+    if(that[key] !== values[key]) result = false;
+  });
+  return result;
+};
 
 Object.prototype.extend = Object.prototype.extend || function(self, extendWith){
   var that = this;
@@ -131,7 +158,7 @@ Object.prototype.extend = Object.prototype.extend || function(self, extendWith){
     source[key] = extentions[key];
   });  
   return source;
-}
+};
 
 Object.prototype.trimAll = function(deep){
   var that = this;
@@ -141,7 +168,31 @@ Object.prototype.trimAll = function(deep){
     else if (typeof that[key] === "object" && deep === true) that[key].trimAll(true);
   });
   return that;
-}
+};
+
+Array.prototype.filterByValues = Array.prototype.filterByValues || function(values){
+  if(!values) throw "An object is required";
+  if(!values.isObject()) throw "The param must be an object";
+  var newArray = [];
+  for(var i = 0, len = this.length; i < len; i++){
+    if(this[i].hasValues(values)){
+      newArray.push(this[i]);
+    }
+  }
+  return newArray;
+};
+Array.prototype.findByValues = Array.prototype.findByValues || function(values){
+  if(!values) throw "An object is required";
+  if(!values.isObject()) throw "The param must be an object";
+  var result;
+  for(var i = 0, len = this.length; i < len; i++){
+    if(this[i].hasValues(values)){
+      result = this[i];
+      break;
+    }
+  }
+  return result;
+};
 
 String.format = String.format || function(){
   var args = Array.prototype.slice.call(arguments);
