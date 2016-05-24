@@ -120,7 +120,7 @@ Object.prototype.defaults = Object.prototype.defaults || function(){
   return that;
 };
 Object.prototype.pick = Object.prototype.pick || function(){
-  var keyToKeep = Array.prototype.slice.call(arguments);
+  var keyToKeep = (arguments[0].isArray() ? arguments[0]: Array.prototype.slice.call(arguments));
   var that = this;
   var newObj = new that.constructor();
   keyToKeep.filter(function(key){
