@@ -94,13 +94,13 @@ app.post('/users', function(req, res){
 	db.user.create(user)
 		.then(function(newUser){
 			if(newUser){
-				res.json(newUser.toJSON());
+				res.json(newUser.toPublicJSON());
 			}
 		})
 		.catch(function(error){ res.status(500).json(error); });
 });
 
-db.sequelize.sync().then(function() {
+db.sequelize.sync(/*{force: true}*/).then(function() {
 	app.listen(PORT, function() {
 		console.log('Express listening on port ' + PORT + '!');
 	});
