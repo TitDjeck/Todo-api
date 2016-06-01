@@ -4,7 +4,7 @@ var cryptojs = require("crypto-js");
 var jwt = require("jsonwebtoken");
 
 module.exports = function(sequelize, DataTypes) {
-	var user = sequelize.define('user', {
+	var User = sequelize.define('user', {
         email: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -48,7 +48,7 @@ module.exports = function(sequelize, DataTypes) {
                     if(typeof body.email !== "string" || typeof body.password != "string"){
                         reject();
                     } else {
-                        user.findOne({where: {email: body.email}})
+                        User.findOne({where: {email: body.email}})
                             .then(function(_user){
                                 if(!_user || !bcrypt.compareSync(body.password, _user.get('password_hash'))){
                                     reject();
@@ -60,6 +60,31 @@ module.exports = function(sequelize, DataTypes) {
                                 reject();
                             });
                     }	
+                });
+            },
+            findByToken: function(token){
+                return new Promise(function(resolve, reject){
+                    try {
+                        var decodeJWT = jwt.verify(token, "qwerty098");
+                        var bytes = cryptojs.AES.decrypt(decodeJWT.token, "abc123pouet");
+                        var tokenData = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+                        
+                        User.findById(tokenData.id)
+                            .then(function(user){
+                                if(user){
+                                    resolve(user);
+                                } else {
+                                    reject();
+                                }
+                            })
+                            .catch(function(error){
+                                console.error(error);
+                                reject(error);
+                            });
+                    } catch (error) {
+                        console.error(error);
+                        reject();
+                    }
                 });
             }
         },
