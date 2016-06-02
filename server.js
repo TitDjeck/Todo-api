@@ -19,7 +19,9 @@ app.get('/', function(req, res) {
 // GET /todos?completed=false&q=work
 app.get('/todos', middleware.requireAuthentication, function(req, res) {
 	var query = req.query;
-	var where = {};
+	var where = {
+		userId: req.user.get("id")
+	};
 
 	if (query.hasOwnProperty('completed') && query.completed === 'true') {
 		where.completed = true;
@@ -42,9 +44,12 @@ app.get('/todos', middleware.requireAuthentication, function(req, res) {
 
 // GET /todos/:id
 app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
-	var todoId = parseInt(req.params.id, 10);
+	var where = {
+		userId: req.user.get("id"),
+		id: parseInt(req.params.id, 10);
+	};
 
-	db.todo.findById(todoId).then(function (todo) {
+	db.todo.findOne({where: where}).then(function (todo) {
 		if (!!todo) {
 			res.json(todo.toJSON());
 		} else {
@@ -77,23 +82,25 @@ app.post('/todos', middleware.requireAuthentication, function(req, res) {
 
 // DELETE /todos/:id
 app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
-	var todoId = parseInt(req.params.id, 10);	
-	db.todo.destroy({where: {id: todoId}})
-		.then(function(todo){
-			if(todo === 0){ res.status(404).send("todo not found"); } 
-			else { res.json(todo); }
-		})
-		.catch(function(error){ res.status(500).json(error); });
+	db.todo.destroy({where: {
+		id: parseInt(req.params.id, 10),
+		userId: req.user.get("id")
+	}})
+	.then(function(todo){
+		if(todo === 0){ res.status(404).send("todo not found"); } 
+		else { res.json(todo); }
+	})
+	.catch(function(error){ res.status(500).json(error); });
 });
 
 // PUT /todos/:id
 app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
-	debugger;
-	var todoId = parseInt(req.params.id, 10);
 	var body = _.pick(req.body, 'description', 'completed');
 	if(body.description) body.description.trim();
-	//if(body.completed) (_isBoolean(body.completed) && body.completed) || (body.completed = body.completed.toLowerCase() == "true") ? true : false;
-	db.todo.update(body, {where: {id: todoId}})
+	db.todo.update(body, {where: {
+			id: parseInt(req.params.id, 10),
+			userId: req.user.get("id")
+		}})
 		.then(function(todo){
 			if(todo[0] == 0){ res.status(404).send("todo not found"); }
 			else { res.json(todo); }
