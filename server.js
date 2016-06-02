@@ -58,7 +58,8 @@ app.get('/todos/:id', middleware.requireAuthentication, function(req, res) {
 // POST /todos
 app.post('/todos', middleware.requireAuthentication, function(req, res) {
 	var body = _.pick(req.body, 'description', 'completed');
-
+	body.description = body.description.trim() || "";
+	body.completed = body.completed && body.completed.toLowerCase() == "true" ? true : false; 
 	db.todo.create(body).then(function (todo) {
 		res.json(todo.toJSON());
 	}, function (e) {
@@ -79,11 +80,14 @@ app.delete('/todos/:id', middleware.requireAuthentication, function(req, res) {
 
 // PUT /todos/:id
 app.put('/todos/:id', middleware.requireAuthentication, function(req, res) {
+	debugger;
 	var todoId = parseInt(req.params.id, 10);
 	var body = _.pick(req.body, 'description', 'completed');
+	if(body.description) body.description.trim();
+	//if(body.completed) (_isBoolean(body.completed) && body.completed) || (body.completed = body.completed.toLowerCase() == "true") ? true : false;
 	db.todo.update(body, {where: {id: todoId}})
 		.then(function(todo){
-			if(todo[0] == 0){ res.status(404).send("todo not found"); } 
+			if(todo[0] == 0){ res.status(404).send("todo not found"); }
 			else { res.json(todo); }
 		})
 		.catch(function(error){ res.status(500).json(error); });
