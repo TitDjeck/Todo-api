@@ -1,3 +1,13 @@
+if (!Object.defineProperty)
+  Object.defineProperty = function(obj, propertyName, description) {
+    if (description.value) {
+      obj[propertyName] = description.value;
+    } else if (description.get) {
+      if (!Function.prototype.isPrototypeOf(description.get)) throw "'get' needs to be a function."
+      obj[propertyName] = description.get();
+    }
+  };
+
 if (!String.format)
   Object.defineProperty(String, "format", {
     enumerable: false,
